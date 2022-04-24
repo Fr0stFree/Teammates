@@ -1,15 +1,20 @@
 <html lang="ru">
     <head>
-
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>MY TITLE</title>
-
     </head>
-
     <body>
         {% include 'navbar.html' %}
+        {% if messages %}
+            <ul class='messages'>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         {% block content %}
+            SOMETHING GOES WRONG
         {% endblock content %}
     </body>
 </html>

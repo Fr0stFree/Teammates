@@ -14,17 +14,21 @@ class Room(models.Model):
         to=User,
         related_name='rooms',
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
     )
     topic = models.ForeignKey(
         to=Topic,
         related_name='rooms',
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+    )
+    participants = models.ManyToManyField(
+        to=User,
+        related_name='participants',
+        blank=True,
     )
     name = models.CharField(max_length=150)
     description = models.TextField(null=True, blank=True)
-    # participants =
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
