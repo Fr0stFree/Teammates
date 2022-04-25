@@ -1,15 +1,40 @@
 {% extends 'main.html' %}
 {% block content %}
-<style>
-    .profile-container {
-        display: grid;
-        grid-template-columns: 1fr 4fr 1fr;
-    }
-</style>
-    <h1>{{ user.username }}</h1>
-    <div class='profile-container'>
-        <div>{% include 'includes/topics.html' %}</div>
-        <div>{% include 'includes/feed.html' %}</div>
-        <div>{% include 'includes/activity.html' %}</div>
-    </div>
+    <main class="profile-page layout layout--3">
+        <div class="container">
+            {% include 'includes/topics.html' %}
+            <div class="roomList">
+                <div class="profile">
+                    <div class="profile__avatar">
+                        <div class="avatar avatar--large active">
+                            <img src="https://randomuser.me/api/portraits/men/11.jpg" />
+                        </div>
+                    </div>
+                    <div class="profile__info">
+                        <h3>{{ user.username }}</h3>
+                        <p>
+                            @{{ user.username }}
+                        </p>
+                        <a href="#" class="btn btn--main btn--pill">Edit Profile</a>
+                    </div>
+                    <div class="profile__about">
+                        <h3>About</h3>
+                        <p>
+                            USER BIO
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur illo tenetur
+                            facilis sunt nemo debitis quisquam hic atque aut? Ducimus alias placeat optio
+                            accusamus repudiandae quis ab ex exercitationem rem?
+                        </p>
+                    </div>
+                </div>
+                <div class="roomList__header">
+                    <div>
+                        <h2>Study Rooms Hosted by {{ user.username }}</h2>
+                    </div>
+                </div>
+                {% include 'includes/feed.html' %}
+            </div>
+            {% include 'includes/activity.html' %}
+        </div>
+    </main>
 {% endblock content %}

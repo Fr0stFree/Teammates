@@ -1,0 +1,23 @@
+{% extends 'main.html' %}
+{% block content %}
+    <style>
+    .title {
+        text-align: center;
+    }
+    .home-container {
+        display: grid;
+        grid-template-columns: 1fr 4fr 1fr; 
+    }
+    </style>
+    <h1 class='title'>HOME TEMPLATE</h1>
+    <div class='home-container'>
+        <div>{% include 'includes/topics.html' %}</div>
+        <div>
+            <h5>{{ room_count }} room available</h5>
+            <a href="{% url 'create-room' %}">Create Room</a>
+            <hr>
+            <div>{% include 'includes/feed.html' %}</div>
+        </div>
+        <div>{% include 'includes/activity.html' %}</div>
+    </div>
+{% endblock content %}
