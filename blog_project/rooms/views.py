@@ -139,7 +139,7 @@ def updateRoom(request, pk):
     room = Room.objects.get(pk=pk)
 
     if request.user != room.host and not request.user.is_superuser:
-        return HttpResponse('fuck you slave')
+        return HttpResponse('Permission denied')
 
     if request.method == 'GET':
         template = 'rooms/room_form.html'
@@ -161,7 +161,7 @@ def deleteRoom(request, pk):
     room = Room.objects.get(pk=pk)
 
     if request.user != room.host and not request.user.is_superuser:
-        return HttpResponse('fuck you slave')
+        return HttpResponse('Permission denied')
 
     if request.method == 'GET':
         template = 'delete.html'
@@ -180,7 +180,7 @@ def deleteMessage(request, room_pk, message_pk):
     message = Message.objects.get(pk=message_pk)
 
     if request.user != message.user and not request.user.is_superuser:
-        return HttpResponse('fuck you slave')
+        return HttpResponse('Permission denied')
 
     if request.method == 'GET':
         template = 'delete.html'
