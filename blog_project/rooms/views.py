@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 
-from .models import Room, Topic
+from .models import Room, Topic, Message
 from .forms import RoomForm
 
 def loginPage(request):
@@ -86,6 +86,7 @@ def room(request, pk):
         template = 'rooms/room.html'
         context = {
             'room': room,
+            'participants': room.participants.all(),
             'room_messages': room.messages.all().order_by('-created'),
         }
         return render(request, template, context)
@@ -95,6 +96,7 @@ def room(request, pk):
             user = request.user,
             body = request.POST.get('body'),
         )
+        room.participants.add(request.user)
         return redirect('room', pk=room.pk)
 
 
@@ -110,15 +112,19 @@ def createRoom(request):
     elif request.method == 'POST':
         form = RoomForm(request.POST)
         if form.is_valid():
+            form = form.save(commit=False)
+            form.host = request.user
             form.save()
-            return redirect('home')
+            room = Room.objects.filter(host=request.user).first()
+            room.participants.add(request.user)
+            return redirect('room', pk=room.pk)
 
 
 @login_required(login_url='login')
 def updateRoom(request, pk):
     room = Room.objects.get(pk=pk)
 
-    if request.user != room.host:
+    if request.user != room.host and not request.user.is_superuser:
         return HttpResponse('fuck you slave')
 
     if request.method == 'GET':
@@ -140,7 +146,7 @@ def updateRoom(request, pk):
 def deleteRoom(request, pk):
     room = Room.objects.get(pk=pk)
 
-    if request.user != room.host:
+    if request.user != room.host and not request.user.is_superuser:
         return HttpResponse('fuck you slave')
 
     if request.method == 'GET':
@@ -153,3 +159,22 @@ def deleteRoom(request, pk):
     elif request.method == 'POST':
         room.delete()
         return redirect('home')
+
+
+@login_required(login_url='login')
+def deleteMessage(request, room_pk, message_pk):
+    message = Message.objects.get(pk=message_pk)
+
+    if request.user != message.user and not request.user.is_superuser:
+        return HttpResponse('fuck you slave')
+
+    if request.method == 'GET':
+        template = 'delete.html'
+        context = {
+            'obj': message,
+        }
+        return render(request, template, context)
+
+    elif request.method == 'POST':
+        message.delete()
+        return redirect('room', room_pk)
