@@ -75,7 +75,9 @@ def home(request):
     context = {
         'rooms': rooms,
         'topics': Topic.objects.all(),
-        'room_count': rooms.count()
+        'room_count': rooms.count(),
+        'room_messages': Message.objects.filter(Q(room__topic__name__icontains=q))[:5]
+
     }
     return render(request, template, context)
 
@@ -87,7 +89,7 @@ def room(request, pk):
         context = {
             'room': room,
             'participants': room.participants.all(),
-            'room_messages': room.messages.all().order_by('-created'),
+            'room_messages': room.messages.all(),
         }
         return render(request, template, context)
 
@@ -98,6 +100,18 @@ def room(request, pk):
         )
         room.participants.add(request.user)
         return redirect('room', pk=room.pk)
+
+
+def userProfile(request, pk):
+    template = 'profile.html'
+    user = User.objects.get(pk=pk)
+    context = {
+        'user': user,
+        'rooms': user.rooms.all(),
+        'room_messages': user.messages.all(),
+        'topics': Topic.objects.all(),
+    }
+    return render(request, template, context)
 
 
 @login_required(login_url='login')

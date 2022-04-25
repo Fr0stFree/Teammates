@@ -1,0 +1,12 @@
+<h3>Recent Activity</h3>
+<hr>
+{% for message in room_messages %}
+    <div>
+        <small><a href="{% url 'user-profile' message.user.pk %}">@{{ message.user }}</a> {{ message.created | timesince }}</small>
+        <small>replied to "{{ message.room }}"</small>
+        <p>
+            {{ message.body | truncatechars:30 }}
+        </p>
+        <hr>
+    </div>
+{% endfor %}
