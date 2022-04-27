@@ -200,3 +200,10 @@ def deleteMessage(request, room_pk, message_pk):
     elif request.method == 'POST':
         message.delete()
         return redirect('room', room_pk)
+
+
+@login_required(login_url='login')
+def updateUser(request, pk):
+    template = 'update_user'
+    context = {}
+    return render(request, template, context)
