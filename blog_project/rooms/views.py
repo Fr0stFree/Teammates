@@ -120,18 +120,22 @@ def createRoom(request):
         template = 'rooms/room_form.html'
         context = {
             'form': RoomForm(),
+            'topics': Topic.objects.all(),
         }
         return render(request, template, context)
 
     elif request.method == 'POST':
         form = RoomForm(request.POST)
-        if form.is_valid():
-            form = form.save(commit=False)
-            form.host = request.user
-            form.save()
-            room = Room.objects.filter(host=request.user).first()
-            room.participants.add(request.user)
-            return redirect('room', pk=room.pk)
+        topic_name = request.POST.get('topic')
+        topic, created = Topic.objects.get_or_create(name=topic_name)
+        room = Room.objects.create(
+            host=request.user,
+            topic=topic,
+            name=request.POST.get('name'),
+            description=request.POST.get('description'),
+        )
+        room.participants.add(request.user)
+        return redirect('room', pk=room.pk)
 
 
 @login_required(login_url='login')
@@ -146,14 +150,18 @@ def updateRoom(request, pk):
         context = {
             'room': room,
             'form': RoomForm(instance=room),
+            'topics': Topic.objects.all(),
         }
         return render(request, template, context)
 
     elif request.method == 'POST':
-        form = RoomForm(request.POST, instance=room)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
+        topic_name = request.POST.get('topic')
+        topic, created = Topic.objects.get_or_create(name=topic_name)
+        room.topic = topic
+        room.name = request.POST.get('name')
+        room.description = request.POST.get('description')
+        room.save()
+        return redirect('room', pk=room.pk)
 
 
 @login_required(login_url='login')
