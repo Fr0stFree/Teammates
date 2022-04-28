@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 
 from .models import Room, Topic, Message
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 
 def loginPage(request):
     if request.user.is_authenticated:
@@ -132,7 +132,7 @@ def createRoom(request):
             host=request.user,
             topic=topic,
             name=request.POST.get('name'),
-            description=request.POST.get('description'),
+            description=request.POST.get('description') ,
         )
         room.participants.add(request.user)
         return redirect('room', pk=room.pk)
@@ -203,7 +203,16 @@ def deleteMessage(request, room_pk, message_pk):
 
 
 @login_required(login_url='login')
-def updateUser(request, pk):
-    template = 'update_user'
-    context = {}
-    return render(request, template, context)
+def updateUser(request):
+    if request.method == 'GET':
+        template = 'update_user.html'
+        context = {
+            'form': UserForm(instance=request.user),
+        }
+        return render(request, template, context)
+    
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', request.user.pk)
