@@ -44,19 +44,19 @@ class Message(models.Model):
         to=User,
         related_name='messages',
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
     )
     room = models.ForeignKey(
         to=Room,
         related_name='messages',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
     body = models.TextField()
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-updated', '-created']
+        ordering = ['updated', 'created']
 
     def __str__(self):
         return self.body[:20] + '...'
