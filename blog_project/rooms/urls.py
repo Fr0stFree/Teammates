@@ -16,15 +16,4 @@ urlpatterns = [
     path('delete_room/<str:pk>/', views.deleteRoom, name='delete-room'),
     # URL удаления экземпляра сообщения
     path('delete_msg/<str:pk>/', views.deleteMessage, name='delete-message'),
-
-    # Авторизация пользователя
-    path('login/', views.loginPage, name='login'),
-    # Регистрация пользователя
-    path('register/', views.registerPage, name='register'),
-    # Удаление собственной пользовательской сессии
-    path('logout/', views.logoutUser, name='logout'),
-    # URL страницы пользователя
-    path('profile/<str:pk>/', views.userProfile, name='user-profile'),
-    # URL изменения персональных пользовательских данных
-    path('update_user/', views.updateUser, name='update-user'),
 ]
