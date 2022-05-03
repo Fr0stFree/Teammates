@@ -1,22 +1,31 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from rooms.models import Room
-from .serializers import RoomSerializer
+from users.models import User
+from .serializers import (
+    RoomSerializer,
+    UserListSerializer,
+    UserDetailSerializer,
+)
 
 
-@api_view(['GET'])
-def getRequest(request):
-    return Response({'fuck you': 'slave'})
+class RoomViewSet(ReadOnlyModelViewSet):
+    """
+    Вьюсет для работы с моделями комнат. Только для чтения.
+    """
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
 
 
-@api_view(['GET'])
-def getRooms(request):
-    serializer = RoomSerializer(Room.objects.all(), many=True)
-    return Response(serializer.data)
+class UserViewSet(ReadOnlyModelViewSet):
+    """
+    Вьюсет для работы с пользователями. Только для чтения.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserListSerializer
 
-
-@api_view(['GET'])
-def getRoom(request, pk):
-    serializer = RoomSerializer(Room.objects.get(pk=pk), many=False)
-    return Response(serializer.data)
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return UserListSerializer
+        elif self.action == 'retrieve':
+            return UserDetailSerializer
