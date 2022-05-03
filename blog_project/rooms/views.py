@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponse
@@ -7,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 
 from .models import User, Room, Topic, Message
-from .forms import RoomForm, UserForm
+from .forms import RoomForm, UserForm, CustomUserCreationForm
 
 
 def loginPage(request):
@@ -22,14 +21,14 @@ def loginPage(request):
         return render(request, template, context)
 
     elif request.method == 'POST':
-        username = request.POST.get('username').lower()
+        email = request.POST.get('email').lower()
         password = request.POST.get('password')
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(email=email)
         except:
             messages.error(request, 'User does not exist')
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
             return redirect('home')
@@ -42,13 +41,13 @@ def registerPage(request):
     template = 'login&register.html'
     context = {
         'page': 'register',
-        'form': UserCreationForm(),
+        'form': CustomUserCreationForm(),
     }
     if request.method == 'GET':
         return render(request, template, context)
 
     elif request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
@@ -58,6 +57,7 @@ def registerPage(request):
         else:
             messages.error(request, 'An error occured during registration')
             return render(request, template, context)
+
 
 def logoutUser(request):
     logout(request)
@@ -95,8 +95,8 @@ def room(request, pk):
 
     elif request.method == 'POST':
         room.messages.create(
-            user = request.user,
-            body = request.POST.get('body'),
+            user=request.user,
+            body=request.POST.get('body'),
         )
         room.participants.add(request.user)
         return redirect('room', pk=room.pk)
@@ -132,7 +132,7 @@ def createRoom(request):
             host=request.user,
             topic=topic,
             name=request.POST.get('name'),
-            description=request.POST.get('description') ,
+            description=request.POST.get('description'),
         )
         room.participants.add(request.user)
         return redirect('room', pk=room.pk)
@@ -210,9 +210,9 @@ def updateUser(request):
             'form': UserForm(instance=request.user),
         }
         return render(request, template, context)
-    
+
     if request.method == 'POST':
-        form = UserForm(request.POST, instance=request.user)
+        form = UserForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             return redirect('user-profile', request.user.pk)

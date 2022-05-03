@@ -1,17 +1,25 @@
-from django.contrib.auth.models import User
-from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.forms import ModelForm
 
-from .models import Room
+from .models import Room, User
 
 
-class RoomForm(forms.ModelForm):
-    
+class CustomUserCreationForm(UserCreationForm):
+
+    class Meta:
+        model = User
+        fields = 'name', 'username', 'email', 'password1', 'password2'
+
+
+class RoomForm(ModelForm):
+
     class Meta:
         model = Room
         fields = 'topic', 'name', 'description'
 
-class UserForm(forms.ModelForm):
+
+class UserForm(ModelForm):
 
     class Meta:
         model = User
-        fields = 'username', 'email'
+        fields = 'avatar', 'name', 'username', 'email', 'bio'

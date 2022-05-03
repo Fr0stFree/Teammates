@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
@@ -12,20 +11,13 @@
   </head>
 
   <body>
-
-    {% include 'includes/navbar.html' %}
-
-    {% if messages %}
-    <ul class='messages'>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
+    {% include 'includes/navbar.html' %} {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
     </ul>
-    {% endif %}
-
-    {% block content %}
-        SOMETHING GOES WRONG
-    {% endblock content %}
+    {% endif %} {% block content %} SOMETHING GOES WRONG {% endblock content %}
 
     <script src="{% static 'js/script.js' %}"></script>
   </body>
