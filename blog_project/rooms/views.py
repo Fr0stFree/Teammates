@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 
@@ -10,6 +10,11 @@ from .forms import RoomForm, UserForm, CustomUserCreationForm
 
 
 def loginPage(request):
+    """
+    Вью-функция для авторизации пользователя.
+    """
+    # Если авторизованный пользователь пытается попасть на логин-страницу
+    # через адресную строку - редиректим его на домашнюю страницу
     if request.user.is_authenticated:
         return redirect('home')
 
@@ -21,23 +26,29 @@ def loginPage(request):
         return render(request, template, context)
 
     elif request.method == 'POST':
+        # Валидация полученных из формы параметров и поиск на соответстие в БД
         email = request.POST.get('email').lower()
         password = request.POST.get('password')
         try:
             user = User.objects.get(email=email)
-        except:
-            messages.error(request, 'User does not exist')
+        except User.DoesNotExist:
+            messages.error(request, 'Пользователь не найден')
 
+        # В случае успешной аутентификации залогиним пользователя
+        # и редиректим на домашнюю страницу
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
             return redirect('home')
 
-        messages.error(request, 'Incorrect data')
+        messages.error(request, 'Некорректный пароль')
         return render(request, template, context)
 
 
 def registerPage(request):
+    """
+    Вью-функция для создания экземпляра пользователя.
+    """
     template = 'login&register.html'
     context = {
         'page': 'register',
@@ -55,18 +66,27 @@ def registerPage(request):
             login(request, user)
             return redirect('home')
         else:
-            messages.error(request, 'An error occured during registration')
+            messages.error(request, 'Невозможно создать пользователя с '
+                                    'данными параметрами')
             return render(request, template, context)
 
 
 def logoutUser(request):
+    """
+    Вью-функция удаление сессии пользователя.
+    """
     logout(request)
     return redirect('home')
 
 
 def home(request):
+    """
+    Вью-функция домашней страницы с фильтрацией контента в серчбаре.
+    """
     template = 'rooms/home.html'
+    # Получение параметров из адресной строки
     q = request.GET.get('q') if request.GET.get('q') else ''
+    # Поиск полученныз параметров среди всех тематик, комнат и описаний комнат
     rooms = Room.objects.filter(
         Q(topic__name__icontains=q) |
         Q(name__icontains=q) |
@@ -76,13 +96,18 @@ def home(request):
         'rooms': rooms,
         'topics': Topic.objects.all(),
         'room_count': rooms.count(),
-        'room_messages': Message.objects.filter(Q(room__topic__name__icontains=q))[:5]
+        'room_messages': Message.objects.filter(
+            Q(room__topic__name__icontains=q)
+        )[:5]
 
     }
     return render(request, template, context)
 
 
 def room(request, pk):
+    """
+    Вью-функция страницы экземпляра комнаты.
+    """
     room = get_object_or_404(Room, pk=pk)
     if request.method == 'GET':
         template = 'rooms/room.html'
@@ -93,6 +118,7 @@ def room(request, pk):
         }
         return render(request, template, context)
 
+    # На данной странице возможно добавление комментария через POST-запрос
     elif request.method == 'POST':
         room.messages.create(
             user=request.user,
@@ -103,6 +129,9 @@ def room(request, pk):
 
 
 def userProfile(request, pk):
+    """
+    Вью-функция страницы профиля  пользователя.
+    """
     template = 'profile.html'
     user = User.objects.get(pk=pk)
     context = {
@@ -116,6 +145,9 @@ def userProfile(request, pk):
 
 @login_required(login_url='login')
 def createRoom(request):
+    """
+    Вью-функция создания экземпляра комнаты.
+    """
     if request.method == 'GET':
         template = 'rooms/room_form.html'
         context = {
@@ -125,7 +157,6 @@ def createRoom(request):
         return render(request, template, context)
 
     elif request.method == 'POST':
-        form = RoomForm(request.POST)
         topic_name = request.POST.get('topic')
         topic, created = Topic.objects.get_or_create(name=topic_name)
         room = Room.objects.create(
@@ -140,10 +171,15 @@ def createRoom(request):
 
 @login_required(login_url='login')
 def updateRoom(request, pk):
+    """
+    Вью-функция изменения экземпляра комнаты.
+    """
     room = Room.objects.get(pk=pk)
 
+    # Если пользователь, не являющийся владельцем комнаты пытается изменить
+    # комнату перейдя по url через адресную строку - запрещаем ему доступ
     if request.user != room.host and not request.user.is_superuser:
-        return HttpResponse('Permission denied')
+        return HttpResponseForbidden('Отказано в доступе')
 
     if request.method == 'GET':
         template = 'rooms/room_form.html'
@@ -166,10 +202,15 @@ def updateRoom(request, pk):
 
 @login_required(login_url='login')
 def deleteRoom(request, pk):
+    """
+    Вью-функция удаления экземпляра комнаты.
+    """
     room = Room.objects.get(pk=pk)
 
+    # Если пользователь, не являющийся владельцем комнаты пытается удалить
+    # комнату перейдя по url через адресную строку - запрещаем ему доступ
     if request.user != room.host and not request.user.is_superuser:
-        return HttpResponse('Permission denied')
+        return HttpResponseForbidden('Отказано в доступе')
 
     if request.method == 'GET':
         template = 'delete.html'
@@ -184,11 +225,16 @@ def deleteRoom(request, pk):
 
 
 @login_required(login_url='login')
-def deleteMessage(request, room_pk, message_pk):
-    message = Message.objects.get(pk=message_pk)
+def deleteMessage(request, pk):
+    """
+    Вью-функция удаления экземпляра комментария.
+    """
+    message = Message.objects.get(pk=pk)
 
+    # Если пользователь, не являющийся владельцем комментария пытается удалить
+    # комментарий перейдя по url через адресную строку - запрещаем ему доступ
     if request.user != message.user and not request.user.is_superuser:
-        return HttpResponse('Permission denied')
+        return HttpResponseForbidden('Отказано в доступе')
 
     if request.method == 'GET':
         template = 'delete.html'
@@ -199,11 +245,14 @@ def deleteMessage(request, room_pk, message_pk):
 
     elif request.method == 'POST':
         message.delete()
-        return redirect('room', room_pk)
+        return redirect('room', message.room.pk)
 
 
 @login_required(login_url='login')
 def updateUser(request):
+    """
+    Вью-функция изменения параметров экземпляра пользователя.
+    """
     if request.method == 'GET':
         template = 'update_user.html'
         context = {

@@ -1,6 +1,6 @@
 <div class="activities">
   <div class="activities__header">
-    <h2>Recent Activities</h2>
+    <h2>Активность</h2>
   </div>
   {% for message in room_messages %}
   <div class="activities__box">
@@ -14,12 +14,12 @@
         </div>
         <p>
           @{{ message.user.username }}
-          <span>{{ message.created|timesince }} ago</span>
+          <span>{{ message.created|timesince }} назад</span>
         </p>
       </a>
       {% if request.user == message.user or request.user.is_superuser %}
       <div class="roomListRoom__actions">
-        <a href="{% url 'delete-message' message.room.pk message.pk %}">
+        <a href="{% url 'delete-message' message.pk %}">
           <svg
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
@@ -27,7 +27,7 @@
             height="32"
             viewBox="0 0 32 32"
           >
-            <title>remove</title>
+            <title>удалить</title>
             <path
               d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z"
             ></path>
@@ -38,7 +38,7 @@
     </div>
     <div class="activities__boxContent">
       <p>
-        replied to post
+        ответил в комнате
         <a href="{% url 'room' message.room.pk %}">{{ message.room.name }}</a>
       </p>
       <div class="activities__boxRoomContent">

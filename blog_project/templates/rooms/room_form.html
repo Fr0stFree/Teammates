@@ -16,14 +16,14 @@
                                 </path>
                             </svg>
                         </a>
-                        <h3>Create/Update Room</h3>
+                        <h3>Создать/обновить комнату</h3>
                     </div>
                 </div>
                 <div class="layout__body">
                     <form class="form" method='POST' action=''>
                         {% csrf_token %}
                         <div class="form__group">
-                            <label for="room_topic">Topic</label>
+                            <label for="room_topic">Тематика</label>
                             <input required
                                    type='text'
                                    value="{{ room.topic.name }}"
@@ -40,16 +40,16 @@
                             </datalist>
                         </div>
                         <div class="form__group">
-                            <label for="room_name">Room Name</label>
+                            <label for="room_name">Название</label>
                             {{ form.name }}
                         </div>
                         <div class="form__group">
-                            <label for="room_description">Description</label>
+                            <label for="room_description">Описание</label>
                             {{ form.description }}
                         </div>
                         <div class="form__action">
-                            <a class="btn btn--dark" href="{% url 'home' %}">Cancel</a>
-                            <button class="btn btn--main" type="submit">Confirm</button>
+                            <a class="btn btn--dark" href="{% url 'home' %}">Отменить</a>
+                            <button class="btn btn--main" type="submit">Подтвердить</button>
                         </div>
                     </form>
                 </div>

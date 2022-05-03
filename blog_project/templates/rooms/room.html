@@ -27,7 +27,7 @@
                                      viewBox="0 0 24 24"
                                      width="32"
                                      xmlns="http://www.w3.org/2000/svg">
-                                    <title>edit</title>
+                                    <title>изменить</title>
                                     <g>
                                     <path d="m23.5 22h-15c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h15c.276 0 .5.224.5.5s-.224.5-.5.5z"/>
                                     </g>
@@ -47,7 +47,7 @@
                                      width="32"
                                      height="32"
                                      viewBox="0 0 32 32">
-                                    <title>remove</title>
+                                    <title>удалить</title>
                                     <path d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z">
                                     </path>
                                 </svg>
@@ -63,7 +63,7 @@
                         </div>
                         <div class="room__hosted">
                             <p>
-                                Hosted By {{ room.host.username }}
+                                Создано {{ room.host.username }}
                             </p>
                             <a href="{% url 'user-profile' room.host.pk %}" class="room__author">
                                 <div class="avatar avatar--small">
@@ -90,15 +90,15 @@
                                             </a>
                                             <span class="thread__date">{{ message.created|timesince }}</span>
                                         </div>
-                                        {% if request.user == message.user %}
-                                        <a href="{% url 'delete-message' message.room.pk message.pk %}">
+                                        {% if request.user == message.user or request.user.is_superuser %}
+                                        <a href="{% url 'delete-message' message.id %}">
                                         <div class="thread__delete">
                                             <svg version="1.1"
                                                  xmlns="http://www.w3.org/2000/svg"
                                                  width="32"
                                                  height="32"
                                                  viewBox="0 0 32 32">
-                                                <title>remove</title>
+                                                <title>удалить</title>
                                                 <path d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z">
                                                 </path>
                                             </svg>
@@ -121,7 +121,7 @@
             </div>
             <div class="participants">
                 <h3 class="participants__top">
-                    Participants <span>({{ participants.count }} joined)</span>
+                    Участников <span>({{ participants.count }} присоеденилось)</span>
                 </h3>
                 <div class="participants__list scroll">
                     {% for user in participants %}
