@@ -31,19 +31,19 @@ class Room(models.Model):
         verbose_name='Тематика',
         to=Topic,
         related_name='rooms',
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
     )
     participants = models.ManyToManyField(
         verbose_name='Участники',
         to=User,
         related_name='participants',
         blank=True,
+        null=True,
     )
     description = models.TextField(
         verbose_name='Описание',
-        null=True,
-        blank=True
     )
     updated = models.DateTimeField(verbose_name='Обновлено', auto_now=True)
     created = models.DateTimeField(verbose_name='Создано', auto_now_add=True)

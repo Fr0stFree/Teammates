@@ -1,48 +1,30 @@
+from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
 
 from rooms.models import Room
 from users.models import User
 
 
-class UserListSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для работы со списком пользователей.
-    """
-    class Meta:
-        model = User
-        fields = 'username', 'name'
-
-
-class UserDetailSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для работы экземпляром пользователя.
-    """
+class SignUpSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+    email = serializers.CharField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = (
-            'username',
-            'name',
-            'email',
-            'is_superuser',
-            'bio',
-        )
+        fields = ('username', 'password', 'name', 'email', 'bio')
 
 
-class RoomSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для работы с моделями комнат.
-    """    
-    host = serializers.StringRelatedField()
-    topic = serializers.StringRelatedField()
-    participants = UserListSerializer(many=True)
+class SignInSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = Room
-        fields = (
-            "name",
-            "description",
-            "host",
-            "topic",
-            "participants",
-        )
+        model = User
+        fields = ('email', 'password')
