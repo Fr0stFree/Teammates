@@ -1,4 +1,3 @@
-from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -6,7 +5,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
-from rooms.models import Room
 from users.models import User
 from .serializers import (
     SignUpSerializer,
@@ -33,10 +31,6 @@ class APISignUp(APIView):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         password = serializer.validated_data.get('password')
-        try:
-            validate_password(password)
-        except Exception as e:
-            return Response({'password': e}, status=status.HTTP_403_FORBIDDEN)
         User.objects.create(
             email=serializer.validated_data.get('email'),
             username=serializer.validated_data.get('username'),
