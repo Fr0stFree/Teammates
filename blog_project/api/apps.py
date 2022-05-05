@@ -1,3 +1,4 @@
+from argparse import Namespace
 from django.apps import AppConfig
 
 

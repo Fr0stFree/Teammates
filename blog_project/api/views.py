@@ -41,7 +41,7 @@ class APISignUp(APIView):
         hashed_password = make_password(serializer.validated_data['password'])
         normalized_email = serializer.validated_data['email'].lower()
         serializer.save(password=hashed_password, email=normalized_email)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class APISignIn(APIView):
@@ -79,7 +79,7 @@ class APISignIn(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         token = RefreshToken.for_user(user).access_token
-        return Response({'token': str(token)}, status=status.HTTP_201_CREATED)
+        return Response({'token': str(token)}, status=status.HTTP_200_OK)
 
 
 class UserViewSet(ModelViewSet):
