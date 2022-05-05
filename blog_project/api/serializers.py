@@ -1,8 +1,8 @@
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import validate_email
 from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
 
-from rooms.models import Room
 from users.models import User
 
 
@@ -21,9 +21,13 @@ class SignUpSerializer(serializers.ModelSerializer):
         validate_password(password)
         return password
 
+    def validate_email(self, email):
+        validate_email(email)
+        return email
+
     class Meta:
         model = User
-        fields = ('username', 'password', 'name', 'email', 'bio')
+        fields = ('email', 'username', 'password')
 
 
 class SignInSerializer(serializers.ModelSerializer):

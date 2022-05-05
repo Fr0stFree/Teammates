@@ -25,16 +25,14 @@ def loginPage(request):
         return render(request, template, context)
 
     elif request.method == 'POST':
-        # Валидация полученных из формы параметров и поиск на соответстие в БД
         email = request.POST.get('email').lower()
-        password = request.POST.get('password')
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             messages.error(request, 'Пользователь не найден')
-
         # В случае успешной аутентификации залогиним пользователя
         # и редиректим на домашнюю страницу
+        password = request.POST.get('password')
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)

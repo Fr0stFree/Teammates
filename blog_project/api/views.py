@@ -1,5 +1,5 @@
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,10 +14,10 @@ from .serializers import (
 
 class APISignUp(APIView):
     """
-    Вью-фукнция для получения запроса для отправки на почту кода подтверждения.
-    Для получения требуется предоставить валидные email и username. Права
-    доступа: неавторизованный пользователь. Пример запроса:
-    POST /v1/auth/signup/ HTTP/1.1
+    Вью-фукнция для регистрации нового пользователя. Для получения требуется
+    предоставить валидные email, username и пароль. Права доступа:
+    неавторизованный пользователь. Пример запроса:
+    POST /v1/auth/signup/
     Content-Type: application/json
     {
         "email": "str",
@@ -30,12 +30,8 @@ class APISignUp(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        password = serializer.validated_data.get('password')
-        User.objects.create(
-            email=serializer.validated_data.get('email'),
-            username=serializer.validated_data.get('username'),
-            password=make_password(password)
-        )
+        hashed_password = make_password(serializer.validated_data['password'])
+        serializer.save(password=hashed_password)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -57,18 +53,19 @@ class APISignIn(APIView):
     def post(self, request):
         serializer = SignInSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data.get('email')
+        email = serializer.validated_data.get('email').lower()
 
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response(
-                {'username': 'Пользователь не найден'},
+                {'email': 'Пользователь не найден'},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         password = serializer.validated_data.get('password')
-        if not user.check_password(password):
+        user = authenticate(email=email, password=password)
+        if user is None:
             return Response(
                 {'password': 'Некорректный пароль'},
                 status=status.HTTP_400_BAD_REQUEST,
