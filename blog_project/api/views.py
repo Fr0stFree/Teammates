@@ -2,13 +2,19 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import status, permissions
 
 from users.models import User
+from .permissions import IsAdmin
 from .serializers import (
     SignUpSerializer,
     SignInSerializer,
+    UserSerializer,
+    UserAdminUpdateInfoSerializer,
+    UserSelfUpdateInfoSerializer,
 )
 
 
@@ -40,8 +46,7 @@ class APISignIn(APIView):
     Вью-фукнция для получения JWT-токена. Для получения требуется
     предоставить электронную почту и пароль. Права доступа:
     неавторизованный пользователь. Пример  запроса:
-
-    POST /v1/auth/token/ HTTP/1.1
+    POST /api/auth/signin/
     Content-Type: application/json
     {
         "email": "str",
@@ -72,3 +77,46 @@ class APISignIn(APIView):
             )
         token = RefreshToken.for_user(user).access_token
         return Response({'token': str(token)}, status=status.HTTP_201_CREATED)
+
+
+class UserViewSet(ModelViewSet):
+    """
+    Вьюсет для CRUD-операций с моделями пользователей.
+    Права доступа: администратор. Пример запроса:
+    DELETE /api/users/<username>/ HTTP/1.1
+    По url /api/users/me/ доступно на чтение и изменение
+    собственных пользовательских атрибутов. Права доступа:
+    авторизованный пользователь. Пример запроса:
+    PATCH /api/users/me/ HTTP/1.1
+    Content-Type: application/json
+    {
+        "bio": "str",
+        "name": "str",
+        "username": "str"
+    }
+    """
+    lookup_field = 'username'
+    queryset = User.objects.all()
+    serializer_class = UserAdminUpdateInfoSerializer
+    permission_classes = (IsAdmin, )
+
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return (permissions.IsAuthenticated(),)
+        return super().get_permissions()
+
+    @action(methods=['GET', 'PATCH'], detail=False, url_path='me',
+            permission_classes=(permissions.IsAuthenticated, ))
+    def user_self_retrieve_update(self, request):
+        if request.method == 'GET':
+            serializer = UserSerializer(request.user)
+            return Response(serializer.data)
+        elif request.method == 'PATCH':
+            serializer = UserSelfUpdateInfoSerializer(
+                request.user,
+                data=request.data,
+                partial=True,
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)

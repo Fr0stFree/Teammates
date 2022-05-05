@@ -37,3 +37,22 @@ class SignInSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'password')
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('email', 'username', 'name', 'is_staff', 'bio', 'last_login', 'date_joined')
+
+
+class UserSelfUpdateInfoSerializer(UserSerializer):
+    email = serializers.CharField(read_only=True)
+    is_staff = serializers.BooleanField(read_only=True)
+    last_login = serializers.DateTimeField(read_only=True)
+    date_joined = serializers.DateTimeField(read_only=True)
+
+
+class UserAdminUpdateInfoSerializer(UserSerializer):
+    last_login = serializers.DateTimeField(read_only=True)
+    date_joined = serializers.DateTimeField(read_only=True)
