@@ -1,20 +1,19 @@
 from rest_framework import permissions
 
 
-class IsAdmin(permissions.BasePermission):
+class AdminAndOwnerOrCreateReadOnly(permissions.BasePermission):
     """
-    Данный Пермишен предоставляет доступ к чтению любому пользователялю,
-    а ко пользователям с флагом is_staff или is_superuser - ко всем CRUD
-    операциям c объектом.
+    Данный Пермишен предоставляет следующие права доступа:
+    Anonym      - ReadOnly;
+    User        - Read and Create;
+    User.host   - Create, Read, Update, Destroy;
+    Admin       - Create, Read, Update, Destroy;
     """
     def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated
-            and (request.user.is_staff or request.user.is_superuser)
-        )
+        return (request.method in permissions.SAFE_METHODS
+                or request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        return (
-            request.user.is_authenticated
-            and (request.user.is_staff or request.user.is_superuser)
-        )
+        return (request.method in permissions.SAFE_METHODS
+                or request.user.is_authenticated
+                and (request.user.is_staff or obj.host == request.user))

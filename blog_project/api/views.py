@@ -8,13 +8,15 @@ from rest_framework.decorators import action
 from rest_framework import status, permissions
 
 from users.models import User
-from .permissions import IsAdmin
+from rooms.models import Room
+from .permissions import AdminAndOwnerOrCreateReadOnly
 from .serializers import (
     SignUpSerializer,
     SignInSerializer,
     UserSerializer,
-    UserAdminUpdateInfoSerializer,
-    UserSelfUpdateInfoSerializer,
+    UserAdminUpdateSerializer,
+    UserSelfUpdateSerializer,
+    RoomSerializer,
 )
 
 
@@ -37,15 +39,16 @@ class APISignUp(APIView):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         hashed_password = make_password(serializer.validated_data['password'])
-        serializer.save(password=hashed_password)
+        normalized_email = serializer.validated_data['email'].lower()
+        serializer.save(password=hashed_password, email=normalized_email)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class APISignIn(APIView):
     """
-    Вью-фукнция для получения JWT-токена. Для получения требуется
-    предоставить электронную почту и пароль. Права доступа:
-    неавторизованный пользователь. Пример  запроса:
+    Вью-фукнция для получения JWT-токена. Для получения требуется предоставить
+    электронную почту и пароль. Права доступа: неавторизованный пользователь.
+    Пример  запроса:
     POST /api/auth/signin/
     Content-Type: application/json
     {
@@ -81,12 +84,12 @@ class APISignIn(APIView):
 
 class UserViewSet(ModelViewSet):
     """
-    Вьюсет для CRUD-операций с моделями пользователей.
-    Права доступа: администратор. Пример запроса:
+    Вьюсет для CRUD-операций с моделями пользователей. Права доступа:
+    администратор. Пример запроса:
     DELETE /api/users/<username>/ HTTP/1.1
-    По url /api/users/me/ доступно на чтение и изменение
-    собственных пользовательских атрибутов. Права доступа:
-    авторизованный пользователь. Пример запроса:
+    По url /api/users/me/ доступно на чтение и изменение собственных
+    пользовательских атрибутов. Права доступа: авторизованный пользователь.
+    Пример запроса:
     PATCH /api/users/me/ HTTP/1.1
     Content-Type: application/json
     {
@@ -97,8 +100,8 @@ class UserViewSet(ModelViewSet):
     """
     lookup_field = 'username'
     queryset = User.objects.all()
-    serializer_class = UserAdminUpdateInfoSerializer
-    permission_classes = (IsAdmin, )
+    serializer_class = UserAdminUpdateSerializer
+    permission_classes = (permissions.IsAdminUser,)
 
     def get_permissions(self):
         if self.action == 'retrieve':
@@ -112,7 +115,7 @@ class UserViewSet(ModelViewSet):
             serializer = UserSerializer(request.user)
             return Response(serializer.data)
         elif request.method == 'PATCH':
-            serializer = UserSelfUpdateInfoSerializer(
+            serializer = UserSelfUpdateSerializer(
                 request.user,
                 data=request.data,
                 partial=True,
@@ -120,3 +123,20 @@ class UserViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RoomViewSet(ModelViewSet):
+    """
+    Вьюсет для CRUD-операций с моделями комнат. Права доступа зависят от
+    статуса пользователя (см. permissions.py). Пример запроса:
+    CREATE /api/rooms/
+    Content-Type: application/json
+    {
+        "topic": "str",
+        "name": "str",
+        "description": "str"
+    }
+    """
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    permission_classes = (AdminAndOwnerOrCreateReadOnly,)
