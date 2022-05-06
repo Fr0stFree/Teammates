@@ -24,7 +24,7 @@ class IsAdminAndOwnerOrCreateOnlyMsg(permissions.BasePermission):
     """
     Данный Пермишен предназначен для различения прав между пользователями
     относительно объектов сообщений. Следующие варианты предусмотрены:
-    Anonym      - ReadOnly; 
+    Anonym      - ReadOnly;
     User        - Read and Create;
     User.host   - Create, Read, Update, Destroy;
     Admin       - Create, Read, Update, Destroy;

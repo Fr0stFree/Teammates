@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework import status, permissions, mixins
+from rest_framework import status, permissions
 
 from users.models import User
 from rooms.models import Room, Message
@@ -85,7 +85,7 @@ class APISignIn(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         token = RefreshToken.for_user(user).access_token
-        return Response({'token': str(token)}, status=status.HTTP_200_OK)
+        return Response({'token': str(token)}, status=status.HTTP_201_CREATED)
 
 
 class UserViewSet(ModelViewSet):
@@ -133,7 +133,7 @@ class UserViewSet(ModelViewSet):
 
 class RoomViewSet(ModelViewSet):
     """
-    Вьюсет для CRUD-операций с экземплярами модели комнаты. Доступ к операциям 
+    Вьюсет для CRUD-операций с экземплярами модели комнаты. Доступ к операциям
     зависит прав пользователя (см. permissions.py). Пример запроса:
     POST /api/rooms/
     Content-Type: application/json
@@ -181,4 +181,3 @@ class MessageViewSet(ViewSet):
         message = get_object_or_404(Message, pk=pk, room__pk=room_pk)
         message.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-

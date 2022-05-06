@@ -27,6 +27,5 @@ router.register(
 urlpatterns = [
     path('auth/signup/', views.APISignUp.as_view(), name='signup'),
     path('auth/signin/', views.APISignIn.as_view(), name='signin'),
-    #path('rooms/<int:room_pk>/messages/<int:message_pk/', views.APIMessage.as_view(), name='message'),
     path('', include(router.urls)),
 ]
