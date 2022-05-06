@@ -18,10 +18,10 @@ urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Cats API",
-        default_version='v1',
-        description="Документация для приложения cats проекта Kittygram",
-        contact=openapi.Contact(email="admin@kittygram.ru"),
+        title="Напарники API",
+        default_version='v0.1',
+        description="Документация для API приложения проекта 'Напарники'",
+        contact=openapi.Contact(email="FrostFree@inbox.ru"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,
