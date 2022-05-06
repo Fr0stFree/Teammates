@@ -38,12 +38,30 @@ class SignInSerializer(serializers.ModelSerializer):
         fields = ('email', 'password')
 
 
+class MessageSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(source='user')
+    room = serializers.PrimaryKeyRelatedField(
+        queryset=Room.objects.all(),
+        required=False
+    )
+    body = serializers.CharField()
+    pk = serializers.PrimaryKeyRelatedField(
+        queryset=Message.objects.all(),
+        required=False
+    )
+
+    class Meta:
+        model = Message
+        fields = ('pk', 'author', 'body', 'room')
+
+
 class UserSerializer(serializers.ModelSerializer):
+    messages = MessageSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
         fields = ('email', 'username', 'name', 'is_staff', 'bio', 'last_login',
-                  'date_joined')
+                  'date_joined', 'messages')
 
 
 class UserSelfUpdateSerializer(UserSerializer):
@@ -58,15 +76,7 @@ class UserAdminUpdateSerializer(UserSerializer):
     date_joined = serializers.DateTimeField(read_only=True)
 
 
-class MessageSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
-
-    class Meta:
-        model = Message
-        fields = ('user', 'body')
-
-
-class RoomSerializer(serializers.ModelSerializer):
+class RoomDetailSerializer(serializers.ModelSerializer):
     topic = serializers.CharField()
     host = serializers.StringRelatedField()
     name = serializers.CharField(
@@ -101,3 +111,21 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = ('topic', 'name', 'host', 'description',
                   'updated', 'created', 'participants', 'messages')
+
+
+class RoomListSerializer(serializers.ModelSerializer):
+    topic = serializers.StringRelatedField()
+    host = serializers.StringRelatedField()
+    participants_count = serializers.SerializerMethodField()
+    message_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Room
+        fields = ('topic', 'name', 'host', 'updated', 'created',
+                  'participants_count', 'message_count')
+
+    def get_participants_count(self, obj):
+        return obj.participants.count()
+
+    def get_message_count(self, obj):
+        return obj.messages.count()

@@ -11,13 +11,13 @@ client = APIClient()
 fake = Faker()
 
 
-@pytest.mark.django_db
-def test_anon_able_to_register():
+@pytest.mark.django_db(transaction=True)
+def test_anon_able_to_register(anon):
     count_users = User.objects.count()
     payload = {
-        'email': Faker().email(),
-        'username': Faker().user_name(),
-        'password': Faker().password(),
+        'email': anon.get('email'),
+        'username': anon.get('username'),
+        'password': anon.get('password'),
     }
     response = client.post(reverse('api:signup'), payload)
     registered_anon = User.objects.filter(
@@ -29,7 +29,7 @@ def test_anon_able_to_register():
     assert count_users + 1 == User.objects.count()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_able_to_get_token(user):
     payload = {
         'password': USER_PASSWORD,
@@ -40,18 +40,18 @@ def test_user_able_to_get_token(user):
     assert 'token' in response.data
 
 
-@pytest.mark.django_db
-def test_non_existent_user_unable_to_get_token():
+@pytest.mark.django_db(transaction=True)
+def test_non_existent_user_unable_to_get_token(anon):
     payload = {
-        'email': Faker().email(),
-        'password': Faker().password(),
+        'email': anon.get('email'),
+        'password': anon.get('password'),
     }
     response = client.post(reverse('api:signin'), payload)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert 'token' not in response.data
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_unable_to_get_token_with_wrong_password(user):
     payload = {
         'email': user.email,

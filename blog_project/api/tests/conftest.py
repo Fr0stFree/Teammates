@@ -19,11 +19,11 @@ def user():
     return user_instance
 
 
-""" @pytest.fixture
+@pytest.fixture
 def anon():
     anon_data = {
         'email': Faker().email(),
         'username': Faker().user_name(),
         'password': Faker().password(),
     }
-    return anon_data """
+    return anon_data

@@ -13,6 +13,12 @@ router.register(
 )
 
 router.register(
+    prefix=r'rooms/(?P<room_pk>\d+)/messages',
+    viewset=views.MessageViewSet,
+    basename='messages',
+)
+
+router.register(
     prefix='rooms',
     viewset=views.RoomViewSet,
     basename='rooms',
@@ -21,5 +27,6 @@ router.register(
 urlpatterns = [
     path('auth/signup/', views.APISignUp.as_view(), name='signup'),
     path('auth/signin/', views.APISignIn.as_view(), name='signin'),
+    #path('rooms/<int:room_pk>/messages/<int:message_pk/', views.APIMessage.as_view(), name='message'),
     path('', include(router.urls)),
 ]

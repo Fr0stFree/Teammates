@@ -1,22 +1,28 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
+from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework import status, permissions
+from rest_framework import status, permissions, mixins
 
 from users.models import User
-from rooms.models import Room
-from .permissions import AdminAndOwnerOrCreateReadOnly
+from rooms.models import Room, Message
+from .permissions import (
+    IsAdminAndOwnerOrCreateReadOnlyRoom,
+    IsAdminAndOwnerOrCreateOnlyMsg,
+)
 from .serializers import (
     SignUpSerializer,
     SignInSerializer,
     UserSerializer,
     UserAdminUpdateSerializer,
     UserSelfUpdateSerializer,
-    RoomSerializer,
+    RoomDetailSerializer,
+    RoomListSerializer,
+    MessageSerializer,
 )
 
 
@@ -127,9 +133,9 @@ class UserViewSet(ModelViewSet):
 
 class RoomViewSet(ModelViewSet):
     """
-    Вьюсет для CRUD-операций с моделями комнат. Права доступа зависят от
-    статуса пользователя (см. permissions.py). Пример запроса:
-    CREATE /api/rooms/
+    Вьюсет для CRUD-операций с экземплярами модели комнаты. Доступ к операциям 
+    зависит прав пользователя (см. permissions.py). Пример запроса:
+    POST /api/rooms/
     Content-Type: application/json
     {
         "topic": "str",
@@ -138,5 +144,41 @@ class RoomViewSet(ModelViewSet):
     }
     """
     queryset = Room.objects.all()
-    serializer_class = RoomSerializer
-    permission_classes = (AdminAndOwnerOrCreateReadOnly,)
+    serializer_class = RoomDetailSerializer
+    permission_classes = (IsAdminAndOwnerOrCreateReadOnlyRoom,)
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return RoomListSerializer
+        return super().get_serializer_class()
+
+
+class MessageViewSet(ViewSet):
+    """
+    Вьюсет для создания и удаления экземпляров медели сообщения (комментария).
+    Доступ к операциям зависит прав пользователя (см. permissions.py).
+    Пример запроса:
+    POST /api/rooms/<room_pk>/messages/
+    Content-Type: application/json
+    {
+        "body": "str"
+    }
+    """
+    permission_classes = (IsAdminAndOwnerOrCreateOnlyMsg,)
+
+    def create(self, request, room_pk):
+        serializer = MessageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        room = get_object_or_404(Room, pk=room_pk)
+        serializer.save(
+            user=request.user,
+            room=room,
+        )
+        room.participants.add(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk, room_pk):
+        message = get_object_or_404(Message, pk=pk, room__pk=room_pk)
+        message.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
