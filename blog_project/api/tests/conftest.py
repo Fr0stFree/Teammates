@@ -1,68 +1,68 @@
 import pytest
+from collections import namedtuple
 from faker import Faker
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.test import APIClient
 
 from users.models import User
 
-
+ANON_PASSWORD = Faker().password()
 USER_PASSWORD = Faker().password()
 ADMIN_PASSWORD = Faker().password()
 
 
-def create_user_instance(password, is_staff=False, is_superuser=False):
-    instance = User.objects.create_user(
-        email=Faker().email(),
-        username=Faker().user_name(),
-        password=password,
-        name=Faker().name(),
-        bio=Faker().paragraph(nb_sentences=2),
-        is_staff=is_staff,
-        is_superuser=is_superuser,
-    )
-    return instance
+class Client:
+    def __init__(self, password, anon=False, is_staff=False, is_superuser=False):
+        if not anon:
+            self.properties = User.objects.create_user(
+                email=Faker().email(),
+                username=Faker().user_name(),
+                password=password,
+                name=Faker().name(),
+                bio=Faker().paragraph(nb_sentences=2),
+                is_staff=is_staff,
+                is_superuser=is_superuser,
+            )
+            token = RefreshToken.for_user(self.properties).access_token
+            self.client = APIClient()
+            self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        else:
+            self.client = APIClient()
+            Prop = namedtuple(
+                'props', ('email', 'username', 'password', 'name', 'bio')
+            )
+            self.properties = Prop(
+                Faker().email(),
+                Faker().user_name(),
+                password,
+                Faker().name(),
+                Faker().paragraph(nb_sentences=2)
+            )
+
+    def request(self, method, url, payload=None):
+        request = {
+            'GET': self.client.get(url, payload),
+            'POST': self.client.post(url, payload),
+            'PATCH': self.client.patch(url, payload),
+            'DELETE': self.client.delete(url, payload),
+        }
+        response = request.get(method)
+        return response
+
 
 @pytest.fixture
 def anon():
-    class AnonUser:
-        email = Faker().email()
-        username = Faker().user_name()
-        password = Faker().password()
-        client = APIClient()
-    return AnonUser
+    anon = Client(ANON_PASSWORD, True)
+    return anon
 
 
 @pytest.fixture
 def user():
-    USER_PASSWORD = Faker().password()
-    instance = create_user_instance(USER_PASSWORD)
-    refresh = RefreshToken.for_user(instance)
-
-    class AuthUser:
-        email = instance.email
-        username = instance.username
-        password = USER_PASSWORD
-        name = instance.name
-        bio = instance.bio
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
-
-    return AuthUser
+    user = Client(USER_PASSWORD, False)
+    return user
 
 
 @pytest.fixture
 def admin():
-    ADMIN_PASSWORD = Faker().password()
-    instance = create_user_instance(ADMIN_PASSWORD, True, True)
-    refresh = RefreshToken.for_user(instance)
-
-    class AdminUser:
-        email = instance.email
-        username = instance.username
-        password = USER_PASSWORD
-        name = instance.name
-        bio = instance.bio
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
-
-    return AdminUser
+    admin = Client(ADMIN_PASSWORD, False, True, True)
+    return admin

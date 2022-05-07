@@ -45,7 +45,7 @@ class APISignUp(APIView):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         hashed_password = make_password(serializer.validated_data['password'])
-        normalized_email = serializer.validated_data['email'].lower()
+        normalized_email = serializer.validated_data.get('email').lower()
         serializer.save(password=hashed_password, email=normalized_email)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -111,7 +111,7 @@ class UserViewSet(ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'retrieve':
-            return (permissions.IsAuthenticated(),)
+            return (permissions.AllowAny(),)
         return super().get_permissions()
 
     @action(methods=['GET', 'PATCH'], detail=False, url_path='me',

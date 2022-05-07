@@ -12,10 +12,11 @@ class User(AbstractUser):
         verbose_name='Имя и фамилия',
         max_length=40,
         null=True,
+        blank=True,
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
-        null=True,
+        null=False,
         unique=True,
     )
     bio = models.TextField(
