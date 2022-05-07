@@ -12,7 +12,8 @@ ADMIN_PASSWORD = Faker().password()
 
 
 class Client:
-    def __init__(self, password, anon=False, is_staff=False, is_superuser=False):
+    def __init__(self, password, anon=False, is_staff=False,
+                 is_superuser=False):
         if not anon:
             self.properties = User.objects.create_user(
                 email=Faker().email(),
