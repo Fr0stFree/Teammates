@@ -20,6 +20,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         ],
     )
     password = serializers.CharField(
+        required=True,
         write_only=True,
         validators=[validate_password],
     )
@@ -31,7 +32,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 class SignInSerializer(serializers.ModelSerializer):
     email = serializers.CharField(required=True)
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(required=True, write_only=True)
 
     class Meta:
         model = User
@@ -55,13 +56,13 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = ('pk', 'author', 'body', 'room')
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(SignUpSerializer):
     messages = MessageSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'name', 'is_staff', 'bio', 'last_login',
-                  'date_joined', 'messages')
+        fields = ('email', 'username', 'password', 'name', 'is_staff', 'bio',
+                  'last_login', 'date_joined', 'messages')
 
 
 class UserSelfUpdateSerializer(UserSerializer):
