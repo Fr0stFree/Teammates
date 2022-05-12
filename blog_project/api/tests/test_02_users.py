@@ -10,7 +10,6 @@ LIST_METHODS = ['GET', 'POST']
 
 # Permissions
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize('method', LIST_METHODS)
 def test_anon_permissions_for_user_list(method, anon):
@@ -23,7 +22,6 @@ def test_anon_permissions_for_user_list(method, anon):
     assert response.status_code == expected_status_code.get(method)
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize('method', DETAIL_METHODS)
 def test_anon_permissions_for_user_detail(method, anon, user):
@@ -37,7 +35,6 @@ def test_anon_permissions_for_user_detail(method, anon, user):
     assert response.status_code == expected_status_code.get(method)
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize('method', LIST_METHODS)
 def test_user_permissions_for_user_list(method, user):
@@ -50,7 +47,6 @@ def test_user_permissions_for_user_list(method, user):
     assert response.status_code == expected_status_code.get(method)
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize('method', DETAIL_METHODS)
 def test_user_permissions_for_user_detail(method, user, admin):
@@ -64,7 +60,6 @@ def test_user_permissions_for_user_detail(method, user, admin):
     assert response.status_code == expected_status_code.get(method)
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize('method', LIST_METHODS)
 def test_admin_permissions_for_user_list(method, admin):
@@ -78,7 +73,6 @@ def test_admin_permissions_for_user_list(method, admin):
     assert response.status_code == expected_status_code.get(method)
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize('method', DETAIL_METHODS)
 def test_admin_permissions_for_user_detail(method, user, admin):
@@ -94,7 +88,6 @@ def test_admin_permissions_for_user_detail(method, user, admin):
 
 # Serializers
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_other_user_detail_fields_correctness(user, admin):
     url = f'/api/users/{admin.properties.username}/'
@@ -110,7 +103,6 @@ def test_other_user_detail_fields_correctness(user, admin):
     assert response.data.get('password') is None
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_self_user_detail_fields_correctness(user):
     url = '/api/users/me/'
@@ -126,7 +118,6 @@ def test_self_user_detail_fields_correctness(user):
     assert response.data.get('password') is None
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_user_list_fields_correctness(admin):
     url = '/api/users/'
@@ -145,7 +136,6 @@ def test_user_list_fields_correctness(admin):
 
 # Views
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_anon_unable_to_get_self_profile(anon):
     url = '/api/users/me/'
@@ -154,7 +144,6 @@ def test_anon_unable_to_get_self_profile(anon):
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_user_able_to_update_self_profile(user):
     url = '/api/users/me/'
@@ -178,7 +167,6 @@ def test_user_able_to_update_self_profile(user):
     assert user.properties.id == updated_user.first().id
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_user_unable_to_change_self_email_and_status(user):
     url = '/api/users/me/'
@@ -195,7 +183,6 @@ def test_user_unable_to_change_self_email_and_status(user):
     assert user.properties.is_superuser != payload.get('is_superuser')
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_admin_able_to_create_a_user_instance(admin):
     url = '/api/users/'
@@ -223,7 +210,6 @@ def test_admin_able_to_create_a_user_instance(admin):
     assert user_count + 1 == User.objects.count()
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_admin_able_to_update_a_user_instance(admin, user):
     url = f'/api/users/{user.properties.username}/'
@@ -251,7 +237,6 @@ def test_admin_able_to_update_a_user_instance(admin, user):
     assert user.properties.id == updated_user.first().id
 
 
-@pytest.mark.APIusers
 @pytest.mark.django_db(transaction=True)
 def test_admin_able_to_delete_a_user_instance(admin, user):
     url = f'/api/users/{user.properties.username}/'
