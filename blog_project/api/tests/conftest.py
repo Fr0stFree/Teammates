@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.test import APIClient
 
 from users.models import User
+from rooms.models import Room, Topic, Message
 
 ANON_PASSWORD = Faker().password()
 USER_PASSWORD = Faker().password()
@@ -67,3 +68,23 @@ def user():
 def admin():
     admin = Client(ADMIN_PASSWORD, False, True, True)
     return admin
+
+
+@pytest.fixture
+def room():
+    some_guy = Client(Faker().password(), False)
+    room = Room.objects.create(
+        name=Faker().name(),
+        host=some_guy.properties,
+        topic=Topic.objects.create(
+            name=Faker().name(),
+        ),
+        description=Faker().paragraph(nb_sentences=2),
+    )
+    room.participants.add(some_guy.properties)
+    Message.objects.create(
+        user=some_guy.properties,
+        body=Faker().paragraph(nb_sentences=1),
+        room=room,
+    )
+    return room
