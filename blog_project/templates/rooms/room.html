@@ -17,7 +17,7 @@
                                 </path>
                             </svg>
                         </a>
-                        <h3>Study Room</h3>
+                        <h3>Назад</h3>
                     </div>
                     {% if request.user == room.host or request.user.is_superuser %}
                         <div class="room__topRight">
@@ -121,7 +121,7 @@
             </div>
             <div class="participants">
                 <h3 class="participants__top">
-                    Участников <span>({{ participants.count }} присоеденилось)</span>
+                    Участники <span>({{ participants.count }}  чел. в комнате)</span>
                 </h3>
                 <div class="participants__list scroll">
                     {% for user in participants %}
