@@ -19,5 +19,6 @@ def test_room_list_fields_correctness(room, user):
     assert response.data.get('updated') is not None
     assert response.data.get('created') is not None
     assert response.data.get('description') == room.description
-    assert response.data.get('participants') == [participant.username for participant in room.participants.all()]
-    # Постараться разобраться с messages
+    assert response.data.get('participants') == [
+        participant.username for participant in room.participants.all()
+    ]
