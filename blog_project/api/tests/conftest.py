@@ -38,7 +38,7 @@ class Client:
                 Faker().user_name(),
                 password,
                 Faker().name(),
-                Faker().paragraph(nb_sentences=2)
+                Faker().paragraph(nb_sentences=2),
             )
 
     def request(self, method, url, payload=None):
