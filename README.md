@@ -6,7 +6,7 @@
 ### Учебный проект "Напарники"
 Проект "Напарники" - сайт из категории "Блог", бекенд которого целиком написан на [Python](https://github.com/python) и [Django](https://github.com/django/django)
 
-![alt text](https://github.com/Fr0stFree/Teammates/blob/main/home.png?raw=true)
+![alt text](https://github.com/Fr0stFree/Teammates/blob/main/home.jpg?raw=true)
 
 В проекте реализована возможность создания комнат (Room), к которым можно присоединиться в качестве участника (User) и оставлять комментарии (Message), ведя тем самым переписку между участниками комнаты. Каждая комната принадлежит к какой-либо тематике (Topic). 
 
