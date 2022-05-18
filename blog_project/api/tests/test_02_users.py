@@ -67,7 +67,6 @@ def test_admin_permissions_for_user_list(method, admin):
     response = admin.request(method, url)
     expected_status_code = {
         'GET': HTTPStatus.OK,
-        # Запрос без данных для создания пользователя вернет 400
         'POST': HTTPStatus.BAD_REQUEST,
     }
     assert response.status_code == expected_status_code.get(method)
