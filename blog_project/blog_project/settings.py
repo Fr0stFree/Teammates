@@ -7,9 +7,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-0p)20(erj)iiy2oi8vxl=7)v5*$c*e!h7%*()zef_lc&-zji3*'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '84.201.176.249',
+    'localhost',
+    'teammates.zapto.org',
+    '127.0.0.1',
+]
 
 
 INSTALLED_APPS = [
