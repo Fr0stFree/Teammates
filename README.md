@@ -12,8 +12,9 @@
 1. [Python](https://github.com/python)
 2. [Django](https://github.com/django/django)
 3. [Django REST framework](https://github.com/encode/django-rest-framework)
-4. [Pillow](https://github.com/python-pillow/Pillow)
-5. [Swagger](https://github.com/axnsan12/drf-yasg)
+4. [pytest](https://github.com/pytest-dev/pytest)
+5. [Pillow](https://github.com/python-pillow/Pillow)
+6. [Swagger](https://github.com/axnsan12/drf-yasg)
 ---
 ### Запуск проекта
 - Клонировать репозиторий
